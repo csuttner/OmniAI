@@ -15,14 +15,32 @@ struct MessageTextBubble: View {
     }
 
     var body: some View {
-        HStack {
+        VStack {
             if message.isLoading {
                 EllipsesLoadingView()
             } else {
-                Text(message.text)
-                    .textSelection(.enabled)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .foregroundColor(.white)
+                ForEach(message.content) { content in
+                    switch content {
+                    case let .code(_, text):
+                        ScrollView(.horizontal) {
+                            Text(text)
+                                .font(.footnote)
+                                .monospaced()
+                                .textSelection(.enabled)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .foregroundColor(.white)
+                                .padding(style.padding)
+                        }
+                        .background(.black)
+                        .cornerRadius(style.padding)
+                        
+                    case let .plain(text):
+                        Text(text)
+                            .textSelection(.enabled)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .foregroundColor(.white)
+                    }
+                }
             }
         }
         .frame(minHeight: style.minHeight)

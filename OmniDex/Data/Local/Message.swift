@@ -16,6 +16,24 @@ import Observation
     var image: String?
     var isLoading: Bool
     
+    var content: [MessageContent] {
+        text.split(separator: "```")
+            .enumerated()
+            .map { index, segment in
+                if index.isMultiple(of: 2) {
+                    return .plain(String(segment))
+
+                } else {
+                    let components = segment.components(separatedBy: .newlines)
+
+                    return .code(
+                        language: components.first ?? "",
+                        content: components.dropFirst().joined(separator: "\n")
+                    )
+                }
+            }
+    }
+    
     init(
         id: String = UUID().uuidString,
         date: Date = Date(),
@@ -42,5 +60,19 @@ extension Message: Equatable {
 extension Message: Hashable {
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
+    }
+}
+
+enum MessageContent {
+    case plain(String)
+    case code(language: String, content: String)
+}
+
+extension MessageContent: Identifiable {
+    var id: String {
+        switch self {
+        case let .plain(string), let .code(_, string):
+            return string
+        }
     }
 }
